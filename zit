@@ -8,20 +8,24 @@ abort() {
 cmd="$1"
 shift
 
+zit_setup() {
+	ZIT_FILE="$1"
+	shift
+	test -f $ZIT_FILE || abort "No such file $ZIT_FILE"
+	test $ZIT_FILE = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
+	ZIT_DIR=".zit.$ZIT_FILE"
+}
+
 case $cmd in
 	init)
-	file="$1"
-	shift
-	test -f $file || abort "No such file $file"
-	test $file = "`basename $file`" || abort "Sorry, Zit only works on files in the current directory"
-	ZIT_DIR=".zit.$file"
-	test -e $ZIT_DIR && abort "$ZIT_DIR exists already, is $file tracked already?"
+	zit_setup $1
+	test -e $ZIT_DIR && abort "$ZIT_DIR exists, is $ZIT_FILE tracked already?"
 	mkdir $ZIT_DIR && echo "Initializing Zit repository in $ZIT_DIR"
 	test -d $ZIT_DIR || abort "Failed to create $ZIT_DIR"
 	cd $ZIT_DIR
 	git init || abort "Failed to initialize Git repository in $ZIT_DIR" 
-	ln ../$file $file || abort "Failed to link $file into $ZIT_DIR"
-	git add $file || abort "Failed to add $file"
-	git commit "$@" || abort "Failed to make first commit for $file"
+	ln ../$ZIT_FILE $ZIT_FILE || abort "Failed to link $ZIT_FILE into $ZIT_DIR"
+	git add $ZIT_FILE || abort "Failed to add $ZIT_FILE"
+	git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
 	;;
 esac
