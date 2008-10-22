@@ -1,0 +1,29 @@
+#!/bin/bash
+
+abort() {
+	echo $1
+	exit 1
+}
+
+cmd="$1"
+shift
+
+case $cmd in
+	init)
+
+	file="$1"
+	shift
+	test -f $file || abort "No such file $file"
+	file=`readlink -f $file`
+	fname="`basename $file`"
+	ZIT_DIR="`dirname $file`/.zit.$fname"
+	test -e $ZIT_DIR && abort "$ZIT_DIR exists already, is $file tracked already?"
+	mkdir $ZIT_DIR && echo "Initializing Zit repository in $ZIT_DIR"
+	test -d $ZIT_DIR || abort "Failed to create $ZIT_DIR"
+	cd $ZIT_DIR
+	git init || abort "Failed to initialize Git repository in $ZIT_DIR" 
+	ln $file $fname || abort "Failed to link $file into $ZIT_DIR"
+	git add $fname || abort "Failed to add $fname"
+	git commit "$@" || abort "Failed to make first commit for $fname"
+	;;
+esac
