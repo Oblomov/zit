@@ -45,4 +45,9 @@ case $cmd in
 	list)
 	zit_list
 	;;
+	*)
+	zit_setup $1
+	cd $ZIT_DIR
+	git $cmd "$@" $1
+	;;
 esac
