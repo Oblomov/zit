@@ -40,10 +40,10 @@ zit_list() {
 }
 
 case $cmd in
-	init)
+	init|track)
 	zit_init $1
 	;;
-	list)
+	list|tracked)
 	zit_list
 	;;
 	*)
