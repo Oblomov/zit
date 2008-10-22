@@ -28,8 +28,21 @@ zit_init() {
 	git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
 }
 
+zit_list() {
+	for file in `find -path ./.zit.\*/.git`; do
+		export GIT_DIR="$file"
+		file="${file#./.zit.}"
+		file="${file%/.git}"
+		# TODO show actual file status
+		git ls-files -t $file
+	done;
+}
+
 case $cmd in
 	init)
 	zit_init $1
+	;;
+	list)
+	zit_list
 	;;
 esac
