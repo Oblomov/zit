@@ -16,8 +16,7 @@ zit_setup() {
 	ZIT_DIR=".zit.$ZIT_FILE"
 }
 
-case $cmd in
-	init)
+zit_init() {
 	zit_setup $1
 	test -e $ZIT_DIR && abort "$ZIT_DIR exists, is $ZIT_FILE tracked already?"
 	mkdir $ZIT_DIR && echo "Initializing Zit repository in $ZIT_DIR"
@@ -27,5 +26,10 @@ case $cmd in
 	ln ../$ZIT_FILE $ZIT_FILE || abort "Failed to link $ZIT_FILE into $ZIT_DIR"
 	git add $ZIT_FILE || abort "Failed to add $ZIT_FILE"
 	git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
+}
+
+case $cmd in
+	init)
+	zit_init $1
 	;;
 esac
