@@ -8,6 +8,33 @@ abort() {
 cmd="$1"
 shift
 
+USAGE="usage: zit COMMAND FILE [ARGS...]"
+
+zit_help() {
+	cmd="$1"
+	shift
+	case $cmd in
+		git)
+		git help "$@"
+		;;
+		*)
+		echo $USAGE
+		echo ""
+		echo "Set up a git repository under .zit.FILE to track changes for FILE."
+		echo "File must be a regular file and in the current directory."
+		echo "The filesystem must support hardlinks."
+		echo ""
+		echo "Zit commands:"
+		echo "   init		Synonym for track"
+		echo "   list		Synonym for tracked"
+		echo "   track	Start tracking changes to FILE"
+		echo "   tracked	List tracked files in current directory"
+		echo ""
+		echo "See 'zit help git' or 'git help' for git commands."
+		;;
+	esac
+}
+
 zit_setup() {
 	ZIT_FILE="$1"
 	test $ZIT_FILE || abort "Please specify a file"
@@ -40,6 +67,12 @@ zit_list() {
 }
 
 case $cmd in
+	"")
+	echo $USAGE
+	;;
+	help)
+	zit_help "$@"
+	;;
 	init|track)
 	zit_init $1
 	;;
