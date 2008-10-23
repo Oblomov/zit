@@ -22,7 +22,6 @@ zit_help() {
 		echo ""
 		echo "Set up a git repository under .zit.FILE to track changes for FILE."
 		echo "File must be a regular file and in the current directory."
-		echo "The filesystem must support hardlinks."
 		echo ""
 		echo "Zit commands:"
 		echo "   init		Synonym for track"
@@ -41,26 +40,31 @@ zit_setup() {
 	shift
 	test -f $ZIT_FILE || abort "No such file $ZIT_FILE"
 	test $ZIT_FILE = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
-	ZIT_DIR=".zit.$ZIT_FILE"
+	export GIT_DIR=".$ZIT_FILE.git"
+	export GIT_WORK_TREE="`pwd`"
 }
 
 zit_init() {
 	zit_setup $1
-	test -e $ZIT_DIR && abort "$ZIT_DIR exists, is $ZIT_FILE tracked already?"
-	mkdir $ZIT_DIR && echo "Initializing Zit repository in $ZIT_DIR"
-	test -d $ZIT_DIR || abort "Failed to create $ZIT_DIR"
-	cd $ZIT_DIR
-	git init || abort "Failed to initialize Git repository in $ZIT_DIR" 
-	ln ../$ZIT_FILE $ZIT_FILE || abort "Failed to link $ZIT_FILE into $ZIT_DIR"
-	git add $ZIT_FILE || abort "Failed to add $ZIT_FILE"
+	test -e $GIT_DIR && abort "$GIT_DIR exists, is $ZIT_FILE tracked already?"
+	mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
+	test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
+	git init || abort "Failed to initialize Git repository in $GIT_DIR" 
+	echo "*" > $GIT_DIR/info/exclude
+	git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
 	git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
 }
 
 zit_list() {
-	for file in `find -path ./.zit.\*/.git`; do
+	export GIT_WORK_TREE="`pwd`"
+	for file in .*.git; do
+		if ! test -e $file; then
+			echo "(no files tracked by zit)"
+			break
+		fi
 		export GIT_DIR="$file"
-		file="${file#./.zit.}"
-		file="${file%/.git}"
+		file="${file#.}"
+		file="${file%.git}"
 		# TODO show actual file status
 		git ls-files -t $file
 	done;
@@ -81,7 +85,6 @@ case $cmd in
 	;;
 	*)
 	zit_setup $1
-	cd $ZIT_DIR
 	git $cmd "$@" $1
 	;;
 esac
