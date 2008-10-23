@@ -37,7 +37,6 @@ zit_help() {
 zit_setup() {
 	ZIT_FILE="$1"
 	test $ZIT_FILE || abort "Please specify a file"
-	shift
 	test -f $ZIT_FILE || abort "No such file $ZIT_FILE"
 	test $ZIT_FILE = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
 	export GIT_DIR=".$ZIT_FILE.git"
