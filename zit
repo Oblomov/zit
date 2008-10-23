@@ -82,8 +82,33 @@ case $cmd in
 	list|tracked)
 	zit_list
 	;;
+	# Most commands will work with the generic catch-all mechanism used
+	# below, but some of them require a more thorough analysis of the
+	# parameters to decide whether $ZIT_FILE should be put back into the
+	# parameter list or not. For example,
+	# $ zit commit somefile
+	# wouldn't do what one expects it to do, unless 'add' is run first,
+	# (except that
+	# $ zit add somefile
+	# wouldn't work either), however
+	# $ zit commit somefile -a
+	# would work correctly. So we handle some commands separately (for the
+	# moment just add and commit)
+	add|commit)
+	zit_setup $1
+	shift
+	git $cmd "$@" "$ZIT_FILE"
+	;;
+	# the raw<command> method can be used to not replicate $ZIT_FILE in the
+	# parameter list
+	raw*)
+	zit_setup $1
+	shift
+	git ${cmd#raw} "$@"
+	;;
 	*)
 	zit_setup $1
-	git $cmd "$@" $1
+	shift
+	git $cmd "$@"
 	;;
 esac
