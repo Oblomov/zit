@@ -80,17 +80,20 @@ zit_init() {
 
 zit_list() {
 	export GIT_WORK_TREE="`pwd`"
-	for file in .*.git; do
+	GIT_DIR=""
+	for file in "$ZIT_DIR"/*.git .*.git; do
 		if ! test -e $file; then
-			echo "(no files tracked by zit)"
-			break
+			continue
 		fi
 		export GIT_DIR="$file"
 		file="${file#.}"
+		file="${file#zit/}"
 		file="${file%.git}"
 		# TODO show actual file status
 		git ls-files -t $file
 	done;
+	# if $GIT_DIR is empty, no files were found
+	test "$GIT_DIR" || echo "(no files tracked by zit)"
 }
 
 case $cmd in
