@@ -34,24 +34,48 @@ zit_help() {
 	esac
 }
 
+ZIT_DIR=.zit
+
 zit_setup() {
 	ZIT_FILE="$1"
 	test $ZIT_FILE || abort "Please specify a file"
 	test -f $ZIT_FILE || abort "No such file $ZIT_FILE"
 	test $ZIT_FILE = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
-	export GIT_DIR=".$ZIT_FILE.git"
+
 	export GIT_WORK_TREE="`pwd`"
+
+	# first, check if a repo exists already, looking for
+	# .zit/file.git or .file.git, in that order
+	# if neither is found, and .zit exists, set the repo dir
+	# to .zit/file.git, otherwise set it to .file.git
+	GIT_DIR="$ZIT_DIR/$ZIT_FILE.git"
+	if ! test -d "$GIT_DIR"; then
+		GIT_DIR=".$ZIT_FILE.git"
+		if ! test -d "$GIT_DIR"; then
+			test -d "$ZIT_DIR" && GIT_DIR="$ZIT_DIR/$ZIT_FILE.git"
+		fi
+	fi
+	export GIT_DIR
 }
 
 zit_init() {
-	zit_setup $1
-	test -e $GIT_DIR && abort "$GIT_DIR exists, is $ZIT_FILE tracked already?"
-	mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
-	test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
-	git init || abort "Failed to initialize Git repository in $GIT_DIR" 
-	echo "*" > $GIT_DIR/info/exclude
-	git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
-	git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
+	if test "$1"; then
+		zit_setup $1
+		test -e $GIT_DIR && abort "$GIT_DIR exists, is $ZIT_FILE tracked already?"
+		mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
+		test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
+		git init || abort "Failed to initialize Git repository in $GIT_DIR" 
+		echo "*" > $GIT_DIR/info/exclude
+		git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
+		git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
+	else
+		if test -d "$ZIT_DIR"; then
+			echo "$ZIT_DIR exists already"
+			exit
+		fi
+		test -e $ZIT_DIR && abort "$ZIT_DIR exists but it's not a directory, cannot continue"
+		mkdir $ZIT_DIR
+	fi
 }
 
 zit_list() {
