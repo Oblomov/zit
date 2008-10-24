@@ -65,6 +65,7 @@ zit_init() {
 		mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
 		test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
 		git init || abort "Failed to initialize Git repository in $GIT_DIR" 
+		rm -rf $GIT_DIR/{hooks,branches,refs/tags,objects/pack,description}
 		echo "*" > $GIT_DIR/info/exclude
 		git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
 		git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
