@@ -65,8 +65,16 @@ zit_init() {
 		mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
 		test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
 		git init || abort "Failed to initialize Git repository in $GIT_DIR" 
-		rm -rf $GIT_DIR/{hooks,branches,refs/tags,objects/pack,description}
-		echo "*" > $GIT_DIR/info/exclude
+		rm -rf $GIT_DIR/{hooks,info,branches,refs/tags,objects/pack,description}
+		ZIT_IGNORE="$HOME/.zitignore"
+		if ! test -f "$ZIT_IGNORE"; then
+			touch "$ZIT_IGNORE" || abort "Cannot create $ZIT_IGNORE file"
+			echo "# Ignore patterns used by Zit repositories" > "$ZIT_IGNORE"
+			echo "# By default it's the single '*' glob, since we want to ignore all" >> $ZIT_IGNORE
+			echo "# non-tracked files in the work-tree" >> $ZIT_IGNORE
+			echo "*" >> $ZIT_IGNORE
+		fi
+		git config core.excludesfile "$ZIT_IGNORE"
 		git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
 		git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
 	else
