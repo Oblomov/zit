@@ -27,6 +27,10 @@ zit_help() {
 		echo "   K   to be killed"
 		echo "   ?   other"
 		;;
+		import)
+		echo "usage: zit import FILE"
+		echo "Import history from an RCS-tracked file. Requires rcs-fast-export."
+		;;
 		*)
 		echo $USAGE
 		echo ""
@@ -34,6 +38,7 @@ zit_help() {
 		echo "File must be a regular file and in the current directory."
 		echo ""
 		echo "Zit commands:"
+		echo "   import	Import RCS history for FILE"
 		echo "   init		Synonym for track"
 		echo "   list		Synonym for tracked"
 		echo "   track	Start tracking changes to FILE"
@@ -124,6 +129,19 @@ zit_list() {
 	test "$GIT_DIR" || echo "(no files tracked by zit)"
 }
 
+# import an RCS-tracked file using rcs-fast-export, if found
+zit_import() {
+	which rcs-fast-export || abort "rcs-fast-export not found, I can't import RCS-tracked files, sorry"
+	zitdir_init $1
+	# git-fast-import creates a pack file, so (re)build the objects/pack dir
+	mkdir -p $GIT_DIR/objects/pack
+	rcs-fast-export $1 | git-fast-import
+	# for some reason, rcs-fast-export | git-fast-import leaves the original
+	# file in 'deleted' state, a situation which is easily fixed by adding
+	# it back
+	git add -f $1
+}
+
 case $cmd in
 	"")
 	echo $USAGE
@@ -136,6 +154,9 @@ case $cmd in
 	;;
 	list|tracked)
 	zit_list
+	;;
+	import)
+	zit_import $1
 	;;
 	# Most commands will work with the generic catch-all mechanism used
 	# below, but some of them require a more thorough analysis of the
