@@ -31,6 +31,10 @@ zit_help() {
 		echo "usage: zit import FILE"
 		echo "Import history from an RCS-tracked file. Requires rcs-fast-export."
 		;;
+		view)
+		echo "usage: zit view FILE"
+		echo "Browse FILE's history with gitk"
+		;;
 		*)
 		echo $USAGE
 		echo ""
@@ -43,6 +47,7 @@ zit_help() {
 		echo "   list		Synonym for tracked"
 		echo "   track	Start tracking changes to FILE"
 		echo "   tracked	List tracked files in current directory"
+		echo "   view		Browse FILE's history with gitk"
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
 		;;
@@ -157,6 +162,11 @@ case $cmd in
 	;;
 	import)
 	zit_import $1
+	;;
+	view)
+	zit_setup $1
+	shift
+	gitk "$@"
 	;;
 	# Most commands will work with the generic catch-all mechanism used
 	# below, but some of them require a more thorough analysis of the
