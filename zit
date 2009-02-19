@@ -33,7 +33,7 @@ zit_help() {
 		;;
 		view)
 		echo "usage: zit view FILE"
-		echo "Browse FILE's history with gitk"
+		echo "Browse FILE's history with gitk (if possible) or tig."
 		;;
 		with)
 		echo "usage: zit with FILE COMMAND..."
@@ -51,7 +51,7 @@ zit_help() {
 		echo "   list		Synonym for tracked"
 		echo "   track	Start tracking changes to FILE"
 		echo "   tracked	List tracked files in current directory"
-		echo "   view		Browse FILE's history with gitk"
+		echo "   view		Browse FILE's history with gitk or tig"
 		echo "   with		Run a command in FILE's context"
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
@@ -171,7 +171,13 @@ case $cmd in
 	view)
 	zit_setup $1
 	shift
-	gitk "$@"
+	if test -n "$DISPLAY" -a -n "$(which gitk)" ; then
+		gitk "$@"
+	elif test -n "$(which tig)" ; then
+		tig "$@"
+	else
+		abort "Neither gitk or tig could be launched"
+	fi
 	;;
 	with)
 	zit_setup $1
