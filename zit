@@ -5,15 +5,20 @@ abort() {
 	exit 1
 }
 
-cmd="$1"
-shift
+me="$(basename $0)"
+if test "$me" = zit ; then
+	cmd="$1"
+	shift
+else
+	cmd="$me"
+fi
 
 USAGE="usage: zit COMMAND FILE [ARGS...]"
 
 zit_help() {
 	cmd="$1"
 	shift
-	case $cmd in
+	case "$cmd" in
 		git)
 		git help "$@"
 		;;
@@ -55,6 +60,14 @@ zit_help() {
 		echo "   with		Run a command in FILE's context"
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
+		;;
+		zig)
+		echo "usage: zig FILE"
+		echo "Browse FILE's history with tig."
+		;;
+		zik)
+		echo "usage: zik FILE"
+		echo "Browse FILE's history with gitk."
 		;;
 	esac
 }
@@ -152,11 +165,11 @@ zit_import() {
 	git add -f $1
 }
 
-case $cmd in
+case "$cmd" in
 	"")
 	echo $USAGE
 	;;
-	help)
+	help|--help|-h|-?)
 	zit_help "$@"
 	;;
 	init|track)
@@ -183,6 +196,16 @@ case $cmd in
 	zit_setup $1
 	shift
 	"$@"
+	;;
+	zig)
+	zit_setup $1
+	shift
+	tig "$@"
+	;;
+	zik)
+	zit_setup $1
+	shift
+	gitk "$@"
 	;;
 	# Most commands will work with the generic catch-all mechanism used
 	# below, but some of them require a more thorough analysis of the
