@@ -35,6 +35,10 @@ zit_help() {
 		echo "usage: zit view FILE"
 		echo "Browse FILE's history with gitk"
 		;;
+		with)
+		echo "usage: zit with FILE COMMAND..."
+		echo "Run COMMAND after setting up the git environment for FILE."
+		;;
 		*)
 		echo $USAGE
 		echo ""
@@ -48,6 +52,7 @@ zit_help() {
 		echo "   track	Start tracking changes to FILE"
 		echo "   tracked	List tracked files in current directory"
 		echo "   view		Browse FILE's history with gitk"
+		echo "   with		Run a command in FILE's context"
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
 		;;
@@ -167,6 +172,11 @@ case $cmd in
 	zit_setup $1
 	shift
 	gitk "$@"
+	;;
+	with)
+	zit_setup $1
+	shift
+	"$@"
 	;;
 	# Most commands will work with the generic catch-all mechanism used
 	# below, but some of them require a more thorough analysis of the
