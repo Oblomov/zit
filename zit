@@ -44,6 +44,11 @@ zit_help() {
 		echo "usage: zit with FILE COMMAND..."
 		echo "Run COMMAND after setting up the git environment for FILE."
 		;;
+		clone)
+		echo "usage: zit clone REPO [FILE]"
+		echo "Create and track FILE, retrieving its history from repository REPO."
+		echo "FILE is guessed by REPO by stripping the '.git' suffix from the last path component"
+		;;
 		*)
 		echo $USAGE
 		echo ""
@@ -51,6 +56,7 @@ zit_help() {
 		echo "File must be a regular file and in the current directory."
 		echo ""
 		echo "Zit commands:"
+		echo "   clone	Clone and track a remote file"
 		echo "   import	Import RCS history for FILE"
 		echo "   init		Synonym for track"
 		echo "   list		Synonym for tracked"
@@ -165,6 +171,25 @@ zit_import() {
 	git add -f $1
 }
 
+zit_clone() {
+	SRC="$1"
+	test -n "$SRC" || abort "Where do you want to clone from?"
+	if [ -n "$2" ]; then
+		ZIT_FILE="$2"
+	else
+		ZIT_FILE=`basename $SRC .git`
+	fi
+	test -e "$ZIT_FILE" && abort "File $ZIT_FILE exists already"
+	test "$ZIT_FILE" = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
+	touch "$ZIT_FILE" # to make zit_setup happy
+	zitdir_init "$ZIT_FILE"
+
+	git remote add origin "$SRC"
+	git remote update
+	rm "$ZIT_FILE"
+	git checkout -b master origin/master
+}
+
 case "$cmd" in
 	"")
 	echo $USAGE
@@ -174,6 +199,9 @@ case "$cmd" in
 	;;
 	init|track)
 	zit_init $1
+	;;
+	clone)
+	zit_clone "$@"
 	;;
 	list|tracked)
 	zit_list
