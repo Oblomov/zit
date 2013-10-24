@@ -7,7 +7,7 @@ abort() {
 	exit 1
 }
 
-me="$(basename $0)"
+me=$(basename "$0")
 if test "$me" = zit ; then
 	cmd="$1"
 	shift
@@ -84,11 +84,11 @@ ZIT_DIR=.zit
 
 zit_setup() {
 	ZIT_FILE="$1"
-	test $ZIT_FILE || abort "Please specify a file"
-	test -f $ZIT_FILE || abort "No such file $ZIT_FILE"
-	test $ZIT_FILE = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
+	test "$ZIT_FILE" || abort "Please specify a file"
+	test -f "$ZIT_FILE" || abort "No such file $ZIT_FILE"
+	test "$ZIT_FILE" = $(basename "$ZIT_FILE") || abort "Sorry, Zit only works on files in the current directory"
 
-	export GIT_WORK_TREE="`pwd`"
+	export GIT_WORK_TREE=$(pwd)
 
 	# first, check if a repo exists already, looking for
 	# .zit/file.git or .file.git, in that order
@@ -107,11 +107,11 @@ zit_setup() {
 # initialize the zitdir, without actually making the first commit
 zitdir_init() {
 	zit_setup $1
-	test -e $GIT_DIR && abort "$GIT_DIR exists, is $ZIT_FILE tracked already?"
-	mkdir $GIT_DIR && echo "Initializing Zit repository in $GIT_DIR"
-	test -d $GIT_DIR || abort "Failed to create $GIT_DIR"
+	test -e "$GIT_DIR" && abort "$GIT_DIR exists, is $ZIT_FILE tracked already?"
+	mkdir "$GIT_DIR" && echo "Initializing Zit repository in $GIT_DIR"
+	test -d "$GIT_DIR" || abort "Failed to create $GIT_DIR"
 	git init || abort "Failed to initialize Git repository in $GIT_DIR"
-	rm -rf $GIT_DIR/{hooks,info,branches,refs/tags,objects/pack,description}
+	rm -rf "$GIT_DIR"/{hooks,info,branches,refs/tags,objects/pack,description}
 	if test -d "$ZIT_DIR"; then
 		ZIT_EXCLUDE="$ZIT_DIR/exclude"
 	else
@@ -131,20 +131,20 @@ zitdir_init() {
 zit_init() {
 	if test "$1"; then
 		zitdir_init "$1"
-		git add -f $ZIT_FILE || abort "Failed to add $ZIT_FILE"
+		git add -f "$ZIT_FILE" || abort "Failed to add $ZIT_FILE"
 		git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
 	else
 		if test -d "$ZIT_DIR"; then
 			echo "$ZIT_DIR exists already"
 			exit
 		fi
-		test -e $ZIT_DIR && abort "$ZIT_DIR exists but it's not a directory, cannot continue"
-		mkdir $ZIT_DIR
+		test -e "$ZIT_DIR" && abort "$ZIT_DIR exists but it's not a directory, cannot continue"
+		mkdir "$ZIT_DIR"
 	fi
 }
 
 zit_list() {
-	export GIT_WORK_TREE="`pwd`"
+	export GIT_WORK_TREE="$(pwd)"
 	GIT_DIR=""
 	for file in "$ZIT_DIR"/*.git .*.git; do
 		if ! test -e $file; then
@@ -163,14 +163,14 @@ zit_list() {
 # import an RCS-tracked file using rcs-fast-export, if found
 zit_import() {
 	which rcs-fast-export || abort "rcs-fast-export not found, I can't import RCS-tracked files, sorry"
-	zitdir_init $1
+	zitdir_init "$1"
 	# git-fast-import creates a pack file, so (re)build the objects/pack dir
-	mkdir -p $GIT_DIR/objects/pack
-	rcs-fast-export $1 | git-fast-import
+	mkdir -p "$GIT_DIR/objects/pack"
+	rcs-fast-export "$1" | git-fast-import
 	# for some reason, rcs-fast-export | git-fast-import leaves the original
 	# file in 'deleted' state, a situation which is easily fixed by adding
 	# it back
-	git add -f $1
+	git add -f "$1"
 }
 
 zit_clone() {
@@ -179,10 +179,10 @@ zit_clone() {
 	if [ -n "$2" ]; then
 		ZIT_FILE="$2"
 	else
-		ZIT_FILE=`basename $SRC .git`
+		ZIT_FILE=$(basename "$SRC" .git)
 	fi
 	test -e "$ZIT_FILE" && abort "File $ZIT_FILE exists already"
-	test "$ZIT_FILE" = "`basename $ZIT_FILE`" || abort "Sorry, Zit only works on files in the current directory"
+	test "$ZIT_FILE" = $(basename $ZIT_FILE) || abort "Sorry, Zit only works on files in the current directory"
 	touch "$ZIT_FILE" # to make zit_setup happy
 	zitdir_init "$ZIT_FILE"
 
@@ -209,10 +209,10 @@ case "$cmd" in
 	zit_list
 	;;
 	import)
-	zit_import $1
+	zit_import "$1"
 	;;
 	view)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	if test -n "$DISPLAY" -a -n "$(which gitk)" ; then
 		gitk "$@"
@@ -223,17 +223,17 @@ case "$cmd" in
 	fi
 	;;
 	with)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	"$@"
 	;;
 	zig)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	tig "$@"
 	;;
 	zik)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	gitk "$@"
 	;;
@@ -250,19 +250,19 @@ case "$cmd" in
 	# would work correctly. So we handle some commands separately (for the
 	# moment just add and commit)
 	add|commit)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	git $cmd "$@" "$ZIT_FILE"
 	;;
 	# the raw<command> method can be used to not replicate $ZIT_FILE in the
 	# parameter list
 	raw*)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	git ${cmd#raw} "$@"
 	;;
 	*)
-	zit_setup $1
+	zit_setup "$1"
 	shift
 	git $cmd "$@"
 	;;
