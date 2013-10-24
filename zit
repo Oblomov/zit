@@ -21,10 +21,10 @@ zit_help() {
 	cmd="$1"
 	shift
 	case "$cmd" in
-		git)
+	git)
 		git help "$@"
 		;;
-		list|tracked)
+	list|tracked)
 		echo "usage: zit list"
 		echo "Show tracked files, with a one-letter prefix indicating their status:"
 		echo "   H   cached"
@@ -34,24 +34,24 @@ zit_help() {
 		echo "   K   to be killed"
 		echo "   ?   other"
 		;;
-		import)
+	import)
 		echo "usage: zit import FILE"
 		echo "Import history from an RCS-tracked file. Requires rcs-fast-export."
 		;;
-		view)
+	view)
 		echo "usage: zit view FILE"
 		echo "Browse FILE's history with gitk (if possible) or tig."
 		;;
-		with)
+	with)
 		echo "usage: zit with FILE COMMAND..."
 		echo "Run COMMAND after setting up the git environment for FILE."
 		;;
-		clone)
+	clone)
 		echo "usage: zit clone REPO [FILE]"
 		echo "Create and track FILE, retrieving its history from repository REPO."
 		echo "FILE is guessed by REPO by stripping the '.git' suffix from the last path component"
 		;;
-		*)
+	*)
 		echo $USAGE
 		echo ""
 		echo "Set up a git repository under .zit.FILE to track changes for FILE."
@@ -69,11 +69,11 @@ zit_help() {
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
 		;;
-		zig)
+	zig)
 		echo "usage: zig FILE"
 		echo "Browse FILE's history with tig."
 		;;
-		zik)
+	zik)
 		echo "usage: zik FILE"
 		echo "Browse FILE's history with gitk."
 		;;
@@ -193,25 +193,25 @@ zit_clone() {
 }
 
 case "$cmd" in
-	"")
+"")
 	echo $USAGE
 	;;
-	help|--help|-h|-?)
+help|--help|-h|-?)
 	zit_help "$@"
 	;;
-	init|track)
+init|track)
 	zit_init $1
 	;;
-	clone)
+clone)
 	zit_clone "$@"
 	;;
-	list|tracked)
+list|tracked)
 	zit_list
 	;;
-	import)
+import)
 	zit_import "$1"
 	;;
-	view)
+view)
 	zit_setup "$1"
 	shift
 	if test -n "$DISPLAY" -a -n "$(which gitk)" ; then
@@ -222,46 +222,46 @@ case "$cmd" in
 		abort "Neither gitk or tig could be launched"
 	fi
 	;;
-	with)
+with)
 	zit_setup "$1"
 	shift
 	"$@"
 	;;
-	zig)
+zig)
 	zit_setup "$1"
 	shift
 	tig "$@"
 	;;
-	zik)
+zik)
 	zit_setup "$1"
 	shift
 	gitk "$@"
 	;;
-	# Most commands will work with the generic catch-all mechanism used
-	# below, but some of them require a more thorough analysis of the
-	# parameters to decide whether $ZIT_FILE should be put back into the
-	# parameter list or not. For example,
-	# $ zit commit somefile
-	# wouldn't do what one expects it to do, unless 'add' is run first,
-	# (except that
-	# $ zit add somefile
-	# wouldn't work either), however
-	# $ zit commit somefile -a
-	# would work correctly. So we handle some commands separately (for the
-	# moment just add and commit)
-	add|commit)
+# Most commands will work with the generic catch-all mechanism used
+# below, but some of them require a more thorough analysis of the
+# parameters to decide whether $ZIT_FILE should be put back into the
+# parameter list or not. For example,
+# $ zit commit somefile
+# wouldn't do what one expects it to do, unless 'add' is run first,
+# (except that
+# $ zit add somefile
+# wouldn't work either), however
+# $ zit commit somefile -a
+# would work correctly. So we handle some commands separately (for the
+# moment just add and commit)
+add|commit)
 	zit_setup "$1"
 	shift
 	git $cmd "$@" "$ZIT_FILE"
 	;;
 	# the raw<command> method can be used to not replicate $ZIT_FILE in the
 	# parameter list
-	raw*)
+raw*)
 	zit_setup "$1"
 	shift
 	git ${cmd#raw} "$@"
 	;;
-	*)
+*)
 	zit_setup "$1"
 	shift
 	git $cmd "$@"
