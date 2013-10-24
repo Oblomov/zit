@@ -16,6 +16,7 @@ else
 fi
 
 USAGE="usage: zit COMMAND FILE [ARGS...]"
+VERSION=0.2013.10.24
 
 zit_help() {
 	cmd="$1"
@@ -195,6 +196,10 @@ zit_clone() {
 case "$cmd" in
 "")
 	echo $USAGE
+	;;
+version|--version)
+	echo "zit version $VERSION"
+	git --version
 	;;
 help|--help|-h|-?)
 	zit_help "$@"
