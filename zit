@@ -55,7 +55,7 @@ zit_help() {
 	*)
 		echo $USAGE
 		echo ""
-		echo "Set up a git repository under .zit.FILE to track changes for FILE."
+		echo "Set up a git repository under .FILE.git to track changes for FILE."
 		echo "File must be a regular file and in the current directory."
 		echo ""
 		echo "Zit commands:"
