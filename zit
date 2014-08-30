@@ -210,7 +210,7 @@ init|track)
 clone)
 	zit_clone "$@"
 	;;
-list|tracked)
+list|ls|tracked)
 	zit_list
 	;;
 import)
