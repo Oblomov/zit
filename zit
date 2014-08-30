@@ -129,6 +129,12 @@ zitdir_init() {
 	git config core.excludesfile "$ZIT_EXCLUDE"
 }
 
+zitdir_check() {
+	if test -f "$ZIT_DIR"; then
+		abort "$ZIT_DIR exists but it's not a directory, cannot continue"
+	fi
+}
+
 zit_init() {
 	if test -n "$1"; then
 		zitdir_init "$1"
@@ -139,7 +145,7 @@ zit_init() {
 			echo "$ZIT_DIR exists already"
 			exit
 		fi
-		test -e "$ZIT_DIR" && abort "$ZIT_DIR exists but it's not a directory, cannot continue"
+		zitdir_check
 		mkdir "$ZIT_DIR"
 	fi
 }
