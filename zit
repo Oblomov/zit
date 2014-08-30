@@ -130,7 +130,7 @@ zitdir_init() {
 }
 
 zit_init() {
-	if test "$1"; then
+	if test -n "$1"; then
 		zitdir_init "$1"
 		git add -f "$ZIT_FILE" || abort "Failed to add $ZIT_FILE"
 		git commit "$@" || abort "Failed to make first commit for $ZIT_FILE"
@@ -205,7 +205,7 @@ help|--help|-h|-?)
 	zit_help "$@"
 	;;
 init|track)
-	zit_init $1
+	zit_init "$1"
 	;;
 clone)
 	zit_clone "$@"
