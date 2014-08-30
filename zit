@@ -59,6 +59,7 @@ zit_help() {
 		echo "File must be a regular file and in the current directory."
 		echo ""
 		echo "Zit commands:"
+		echo "   add		Stage changes or start tracking changes to FILE"
 		echo "   clone	Clone and track a remote file"
 		echo "   import	Import RCS history for FILE"
 		echo "   init		Synonym for track"
@@ -150,6 +151,18 @@ zit_init() {
 	fi
 }
 
+zit_add() {
+	# add the file if it is tracked, otherwise zit init
+	zitdir_check
+	zit_setup "$1"
+
+	if test -d "$GIT_DIR"; then
+		git add "$1"
+	else
+		zit_init "$1"
+	fi
+}
+
 zit_list() {
 	export GIT_WORK_TREE="$(pwd)"
 	GIT_DIR=""
@@ -210,6 +223,9 @@ version|--version)
 help|--help|-h|-?)
 	zit_help "$@"
 	;;
+add)
+	zit_add "$1"
+	;;
 init|track)
 	zit_init "$1"
 	;;
@@ -253,17 +269,14 @@ zik)
 # parameters to decide whether $ZIT_FILE should be put back into the
 # parameter list or not. For example,
 # $ zit commit somefile
-# wouldn't do what one expects it to do, unless 'add' is run first,
-# (except that
-# $ zit add somefile
-# wouldn't work either), however
+# wouldn't do what one expects it to do, unless 'add' is run first, however
 # $ zit commit somefile -a
 # would work correctly. So we handle some commands separately (for the
-# moment just add and commit)
-add|commit)
+# moment just commit)
+commit)
 	zit_setup "$1"
 	shift
-	git $cmd "$@" "$ZIT_FILE"
+	git commit "$@" "$ZIT_FILE"
 	;;
 	# the raw<command> method can be used to not replicate $ZIT_FILE in the
 	# parameter list
