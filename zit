@@ -2,6 +2,12 @@
 
 # Zit: the git-based single-file content tracker
 
+# Copyright (C) 2008-2014 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Licensed under the GNU GPL v2
+# A full copy of the license text is not included with zit, because the
+# program is self-contained.
+# Refer to http://www.gnu.org/licenses/gpl-2.0.html for the full license terms
+
 abort() {
 	echo $1 >&2
 	exit 1
@@ -16,7 +22,7 @@ else
 fi
 
 USAGE="usage: zit COMMAND FILE [ARGS...]"
-VERSION=0.2013.10.24
+VERSION=0.2014.10.23
 
 zit_help() {
 	cmd="$1"
