@@ -28,11 +28,20 @@ zit_help() {
 	cmd="$1"
 	shift
 	case "$cmd" in
+	clone)
+		echo "usage: zit clone REPO [FILE]"
+		echo "Create and track FILE, retrieving its history from repository REPO."
+		echo "FILE is guessed by REPO by stripping the '.git' suffix from the last path component"
+		;;
 	git)
 		git help "$@"
 		;;
-	list|tracked)
-		echo "usage: zit list"
+	import)
+		echo "usage: zit import FILE"
+		echo "Import history from an RCS-tracked file. Requires rcs-fast-export."
+		;;
+	ls|list|tracked)
+		echo "usage: zit $cmd"
 		echo "Show tracked files, with a one-letter prefix indicating their status:"
 		echo "   H   cached"
 		echo "   M   unmerged"
@@ -40,10 +49,6 @@ zit_help() {
 		echo "   C   modified/changed"
 		echo "   K   to be killed"
 		echo "   ?   other"
-		;;
-	import)
-		echo "usage: zit import FILE"
-		echo "Import history from an RCS-tracked file. Requires rcs-fast-export."
 		;;
 	view)
 		echo "usage: zit view FILE"
@@ -53,10 +58,13 @@ zit_help() {
 		echo "usage: zit with FILE COMMAND..."
 		echo "Run COMMAND after setting up the git environment for FILE."
 		;;
-	clone)
-		echo "usage: zit clone REPO [FILE]"
-		echo "Create and track FILE, retrieving its history from repository REPO."
-		echo "FILE is guessed by REPO by stripping the '.git' suffix from the last path component"
+	zig)
+		echo "usage: zig FILE"
+		echo "Browse FILE's history with tig."
+		;;
+	zik)
+		echo "usage: zik FILE"
+		echo "Browse FILE's history with gitk."
 		;;
 	*)
 		echo $USAGE
@@ -70,20 +78,13 @@ zit_help() {
 		echo "   import	Import RCS history for FILE"
 		echo "   init		Synonym for track"
 		echo "   list		Synonym for tracked"
+		echo "   ls		Synonym for tracked"
 		echo "   track	Start tracking changes to FILE"
 		echo "   tracked	List tracked files in current directory"
 		echo "   view		Browse FILE's history with gitk or tig"
 		echo "   with		Run a command in FILE's context"
 		echo ""
 		echo "See 'zit help git' or 'git help' for git commands."
-		;;
-	zig)
-		echo "usage: zig FILE"
-		echo "Browse FILE's history with tig."
-		;;
-	zik)
-		echo "usage: zik FILE"
-		echo "Browse FILE's history with gitk."
 		;;
 	esac
 }
